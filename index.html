@@ -121,7 +121,7 @@
 (() => {
   // ---------- pieces: names, pixel art
   const NAME = {
-    w: { K:'Tuba', Q:'French horn', R:'Snare drum', B:'Trombone', N:'Euphonium', P:'Trumpet' },
+    w: { K:'Tuba', Q:'Euphonium', R:'Snare drum', B:'Trombone', N:'French horn', P:'Trumpet' },
     b: { K:'Bassoon', Q:'Oboe', R:'Snare drum', B:'Flute', N:'Saxophone', P:'Clarinet' },
   };
   const ROLE = { K:'king', Q:'queen', R:'rook', B:'bishop', N:'knight', P:'pawn' };
@@ -165,7 +165,7 @@
     tuba:['#F0C55A','#8A6420'], trumpet:['#F0C55A','#8A6420'], trombone:['#F0C55A','#8A6420'], horn:['#F0C55A','#8A6420'], euph:['#F0C55A','#8A6420'], snare:['#E9E4D6','#8A94A0'],
     bassoon:['#7A4424','#D8DEE6'], oboe:['#2B2B33','#D8DEE6'], flute:['#D8DEE6','#8A94A0'], bassclar:['#2B2B33','#D8DEE6'], sax:['#D8B24C','#8A6A20'], clarinet:['#2B2B33','#D8DEE6'],
   };
-  const CARRY = { wK:'tuba', wQ:'horn', wR:'snare', wB:'trombone', wN:'euph', wP:'trumpet', bK:'bassoon', bQ:'oboe', bR:'snare', bB:'flute', bN:'sax', bP:'clarinet' };
+  const CARRY = { wK:'tuba', wQ:'euph', wR:'snare', wB:'trombone', wN:'horn', wP:'trumpet', bK:'bassoon', bQ:'oboe', bR:'snare', bB:'flute', bN:'sax', bP:'clarinet' };
   const PLUME = { K: [[0,5,"pppp"],[1,5,"pppp"]], Q: [[0,6,"pp"]], P: [[1,6,".."]] };
   const SIDE = { w: { u:'#C63D2F', t:'#F0C55A', p:'#F0C55A' }, b: { u:'#3A6EB5', t:'#D8DEE6', p:'#F4F1EA' } };
   const COMMON = { h:'#1B1B22', d:'#1B1B22', s:'#E8B892', g:'#F4F1EA' };
