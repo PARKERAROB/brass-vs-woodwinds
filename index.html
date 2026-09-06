@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16130F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Brass vs Woodwinds">
+<title>Brass vs Woodwinds</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%2316130F'/%3E%3Crect x='1' y='1' width='7' height='7' fill='%23E0B14A'/%3E%3Crect x='8' y='8' width='7' height='7' fill='%23E0B14A'/%3E%3Crect x='8' y='1' width='7' height='7' fill='%23DCE6F0'/%3E%3Crect x='1' y='8' width='7' height='7' fill='%23DCE6F0'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+  :root{
+    --bg:#16130F; --panel:#211C16; --line:#3A3129; --ink:#F1E9DA; --muted:#9A8C7A;
+    --light:#D9C9A3; --dark:#7A5A3A; --sel:#F2D264; --hint:#2E6F4C; --check:#C43C2C; --last:#B0893A;
+    --brass:#E0B14A; --brass-dk:#7E5A18; --wood:#DCE6F0; --wood-dk:#3B4A5A;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,sans-serif;font-size:15px;line-height:1.4;
+       padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  .app{min-height:100vh;display:flex;flex-direction:column;gap:10px;padding:10px 12px 14px;max-width:1100px;margin:0 auto}
+  @supports (min-height:100dvh){.app{min-height:100dvh}}
+  header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding:0 2px}
+  h1{font-family:"Silkscreen",monospace;font-weight:700;font-size:clamp(18px,3.4vw,30px);margin:0;line-height:1.1;letter-spacing:.02em}
+  h1 .b{color:var(--brass)} h1 .w{color:var(--wood)}
+  .turn{font-family:"Silkscreen",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .turn b{font-weight:400;color:var(--ink)}
+  .turn.brass b{color:var(--brass)} .turn.wood b{color:var(--wood)}
+  main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;flex:1;min-height:0}
+  @media (max-width:760px){ main{grid-template-columns:1fr} }
+  .boardwrap{display:flex;align-items:flex-start;justify-content:center}
+  .board{--sq:min(calc((100vw - 24px) / 8), calc((100vh - 170px) / 8), 84px);display:grid;grid-template-columns:repeat(8,var(--sq));grid-template-rows:repeat(8,var(--sq));
+         border:3px solid #2A2119;box-shadow:0 30px 60px -30px #000, 0 0 0 1px #000;touch-action:manipulation;user-select:none}
+  @media (max-width:760px){ .board{--sq:min(calc((100vw - 24px) / 8),84px)} }
+  .sq{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .sq.l{background:var(--light)} .sq.d{background:var(--dark)}
+  .sq.last{box-shadow:inset 0 0 0 100px #b0893a55}
+  .sq.sel{box-shadow:inset 0 0 0 100px #f2d26477}
+  .sq.check{box-shadow:inset 0 0 0 100px #c43c2c88}
+  .sq .dot{position:absolute;width:28%;height:28%;border-radius:50%;background:#2E6F4Ccc;pointer-events:none}
+  .sq .ring{position:absolute;inset:6%;border-radius:50%;border:calc(var(--sq) * .08) solid #2E6F4Ccc;pointer-events:none}
+  .sq .coord{position:absolute;font-family:"Silkscreen",monospace;font-size:calc(var(--sq) * .14);opacity:.55;pointer-events:none}
+  .sq .coord.f{right:4%;bottom:2%} .sq .coord.r{left:4%;top:3%}
+  .sq.l .coord{color:var(--dark)} .sq.d .coord{color:var(--light)}
+  .sq svg{width:82%;height:82%;filter:drop-shadow(1px 2px 0 #00000088);pointer-events:none;transition:transform .12s}
+  .sq.sel svg{transform:translateY(-4%) scale(1.06)}
+  @media (prefers-reduced-motion:reduce){.sq svg{transition:none}}
+  aside{display:flex;flex-direction:column;gap:10px;min-width:0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+  .lbl{font-family:"Silkscreen",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+  .btns{display:flex;flex-wrap:wrap;gap:6px}
+  button{font-family:"Silkscreen",monospace;font-size:11px;letter-spacing:.04em;color:var(--ink);background:#2B241C;border:1px solid var(--line);border-radius:4px;min-height:40px;padding:0 12px;cursor:pointer;touch-action:manipulation}
+  button:hover{border-color:var(--muted)} button:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
+  button.on{background:var(--brass);color:#2a1e05;border-color:var(--brass)}
+  button:disabled{opacity:.4;cursor:default}
+  .seg{display:flex} .seg button{border-radius:0;flex:1} .seg button:first-child{border-radius:4px 0 0 4px} .seg button:last-child{border-radius:0 4px 4px 0}
+  .msg{font-size:15px;min-height:1.4em}
+  .msg b{color:var(--sel)}
+  .cap{display:flex;flex-wrap:wrap;gap:2px;min-height:26px}
+  .cap svg{width:24px;height:24px;filter:drop-shadow(1px 1px 0 #0009)}
+  .moves{font-family:"Silkscreen",monospace;font-size:10px;line-height:1.9;max-height:150px;overflow:auto;display:grid;grid-template-columns:2.4em 1fr 1fr;column-gap:8px;color:var(--muted)}
+  .moves .n{color:var(--muted)} .moves .m{color:var(--ink)} .moves .m.b{color:var(--brass)} .moves .m.w{color:var(--wood)}
+  .legend{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:12px;color:var(--muted)}
+  .legend div{display:flex;align-items:center;gap:8px} .legend svg{width:22px;height:22px;flex:none;filter:drop-shadow(1px 1px 0 #0009)}
+  .legend b{color:var(--ink);font-weight:400}
+  .legend .k{font-family:"Silkscreen",monospace;font-size:9px;letter-spacing:.06em;margin-left:auto;text-transform:uppercase}
+  .over{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .over[hidden]{display:none}
+  .banner{background:#16130Fee;border:2px solid var(--sel);padding:14px 20px;font-family:"Silkscreen",monospace;font-size:clamp(12px,2.6vw,18px);text-align:center;color:var(--ink);max-width:80%;line-height:1.5}
+  .banner b{color:var(--sel);font-weight:400}
+  .boardwrap{position:relative}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1><span class="b">Brass</span> vs <span class="w">Woodwinds</span></h1>
+    <div class="turn" id="turn"><b>Brass</b> to move</div>
+  </header>
+  <main>
+    <div class="boardwrap">
+      <div class="board" id="board" role="grid" aria-label="Chess board"></div>
+      <div class="over" id="over" hidden><div class="banner" id="banner"></div></div>
+    </div>
+    <aside>
+      <div class="card">
+        <div class="msg" id="msg">Brass opens. Tap a piece to see where it can go.</div>
+        <div class="btns">
+          <button id="new">New game</button>
+          <button id="undo">Undo</button>
+          <button id="flip">Flip</button>
+          <button id="mute">Sound on</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="lbl">Opponent</div>
+        <div class="seg" id="mode"><button data-m="cpu" class="on">Computer</button><button data-m="2p">Two players</button></div>
+        <div class="lbl">Computer plays</div>
+        <div class="seg" id="side"><button data-s="b" class="on">Woodwinds</button><button data-s="w">Brass</button></div>
+        <div class="lbl">Level</div>
+        <div class="seg" id="level"><button data-l="1">Rookie</button><button data-l="2" class="on">Section leader</button><button data-l="3">Drum major</button></div>
+      </div>
+      <div class="card">
+        <div class="lbl">Captured by brass</div><div class="cap" id="capW"></div>
+        <div class="lbl">Captured by woodwinds</div><div class="cap" id="capB"></div>
+      </div>
+      <div class="card">
+        <div class="lbl">Moves</div>
+        <div class="moves" id="moves"></div>
+      </div>
+      <div class="card">
+        <div class="lbl">Who's who</div>
+        <div class="legend" id="legend"></div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<script>
+(() => {
+  // ---------- pieces: names, pixel art
+  const NAME = {
+    w: { K:'Tuba', Q:'Trumpet', R:'Trombone', B:'French horn', N:'Euphonium', P:'Cornet' },
+    b: { K:'Bassoon', Q:'Flute', R:'Bass clarinet', B:'Oboe', N:'Saxophone', P:'Clarinet' },
+  };
+  const ROLE = { K:'king', Q:'queen', R:'rook', B:'bishop', N:'knight', P:'pawn' };
+  const ART = {
+    wK: ["....#######...","...#########..","....#######...",".....#.#.#....","..o.o.#.#.#...","..#.#.#.#.#...",".############.",".#..........#.",".#..........#.",".#..........#.",".#..........#.",".############.","..##########..","...########..."],
+    wQ: ["..............","..............","..............","....o.o.o.....","....#.#.#....#","..##########.#",".#############","..############","...#.#.#...##.","...#####......","..............","..............","..............",".............."],
+    wR: ["..............","..............","............##","..#########.##",".############.","..#########.##","..#.......#.##","..#########...","..#.......#...","..#########...","..............","..............","..............",".............."],
+    wB: ["..............","....######....","...#......#...","..#..####..#..","..#.#....#.#..","..#.#.oo.#.#..","..#.#....#.#..","..#..####..#..","...#......#.##","....######.###","..........####","...........###","..............",".............."],
+    wN: [".......###....","......#####...",".......###....","........#.....","...o.o.o#.....","...#.#.##.....","..#########...","..#.......#...","..#.......#...","..#.......#...","..#########...","...#######....","..............",".............."],
+    wP: ["..............","..............","..............","......o.o.....","......#.#...#.","....#######.#.","...##########.","....#######.#.","....##.#.#.#..","......###.....","..............","..............","..............",".............."],
+    bK: [".....#........","......#.......",".....#.##.....","....#..##.....","......##.#....","......##.#....","......o#.#....","......##.#....","......#o.#....","......##.#....","......##.#....","......####....","......####....","......####...."],
+    bQ: ["......##......","......##......","......##......","......o#......","......##......","......#o......","......##......","......o#......","......##......","......#o......","......##......","......o#......","......##......","......##......"],
+    bR: [".....###......","....#...#.....","....#...##....","........##....","........o#....","........##....","........#o....","........##....","........o#....","........##....","........##.##.","........###.#.","........#####.","..........##.."],
+    bB: [".......#......",".......#......","......##......","......##......","......o#......","......##......","......#o......","......##......","......o#......","......##......",".....####.....",".....####.....","....######....","..............",],
+    bN: ["......##......",".....#..#.....",".....#..##....","........##....","........o#....","........##....","........#o....","........##....","........o#....","......####....","......###.##..","......###..#..",".......#####..","........###..."],
+    bP: [".......#......","......##......","......##......","......##......","......o#......","......##......","......#o......","......##......","......o#......","......##......",".....####.....","....######....","..............",".............."],
+  };
+  const svgCache = {};
+  function svgFor(code) {
+    if (svgCache[code]) return svgCache[code];
+    const c = code[0], rows = ART[code];
+    const body = c === 'w' ? css('--brass') : css('--wood'), acc = c === 'w' ? css('--brass-dk') : css('--wood-dk');
+    let r = '';
+    rows.forEach((row, y) => { for (let x = 0; x < 14; x++) { const ch = row[x]; if (ch === '#') r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${body}"/>`; else if (ch === 'o') r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${acc}"/>`; } });
+    return svgCache[code] = `<svg viewBox="0 0 14 14" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+  }
+  function css(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+  // ---------- chess engine (0..63, a8 = 0, h1 = 63)
+  const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
+  function parse(fen) { const b = new Array(64).fill(null); let i = 0; for (const ch of fen) { if (ch === '/') continue; if (ch >= '1' && ch <= '8') i += +ch; else { b[i++] = ch; } } return b; }
+  const colorOf = p => p === p.toUpperCase() ? 'w' : 'b';
+  const typeOf = p => p.toUpperCase();
+  const file = s => s % 8, rank = s => s >> 3;
+  const sqName = s => 'abcdefgh'[file(s)] + (8 - rank(s));
+  const VAL = { P:100, N:320, B:330, R:500, Q:900, K:20000 };
+  const KN = [[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]];
+  const KG = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+  const DIRS = { B: [[1,1],[1,-1],[-1,1],[-1,-1]], R: [[1,0],[-1,0],[0,1],[0,-1]] }; DIRS.Q = DIRS.B.concat(DIRS.R);
+  const on = (f, r) => f >= 0 && f < 8 && r >= 0 && r < 8;
+
+  function newState() { return { board: parse(START), turn: 'w', castle: { K:true, Q:true, k:true, q:true }, ep: -1, history: [], caps: { w: [], b: [] }, moves: [] }; }
+  function attacked(board, sq, by) {
+    const f = file(sq), r = rank(sq);
+    const pd = by === 'w' ? 1 : -1; // pawns of 'by' attack from rank r+pd (w pawns sit below, i.e. larger rank index)
+    for (const df of [-1, 1]) { const ff = f + df, rr = r + pd; if (on(ff, rr)) { const p = board[rr*8+ff]; if (p && colorOf(p) === by && typeOf(p) === 'P') return true; } }
+    for (const [df, dr] of KN) { const ff = f+df, rr = r+dr; if (on(ff, rr)) { const p = board[rr*8+ff]; if (p && colorOf(p) === by && typeOf(p) === 'N') return true; } }
+    for (const [df, dr] of KG) { const ff = f+df, rr = r+dr; if (on(ff, rr)) { const p = board[rr*8+ff]; if (p && colorOf(p) === by && typeOf(p) === 'K') return true; } }
+    for (const [df, dr] of DIRS.Q) {
+      let ff = f+df, rr = r+dr;
+      while (on(ff, rr)) { const p = board[rr*8+ff]; if (p) { if (colorOf(p) === by) { const t = typeOf(p); if (t === 'Q' || (t === 'B' && df && dr) || (t === 'R' && (!df || !dr))) return true; } break; } ff += df; rr += dr; }
+    }
+    return false;
+  }
+  const kingSq = (board, c) => board.indexOf(c === 'w' ? 'K' : 'k');
+  const inCheck = (st, c) => attacked(st.board, kingSq(st.board, c), c === 'w' ? 'b' : 'w');
+
+  function pseudo(st) {
+    const { board, turn } = st, out = [];
+    const add = (from, to, extra) => out.push(Object.assign({ from, to, piece: board[from], capt: board[to] }, extra));
+    for (let s = 0; s < 64; s++) {
+      const p = board[s]; if (!p || colorOf(p) !== turn) continue;
+      const t = typeOf(p), f = file(s), r = rank(s);
+      if (t === 'P') {
+        const dr = turn === 'w' ? -1 : 1, start = turn === 'w' ? 6 : 1, last = turn === 'w' ? 0 : 7;
+        const r1 = r + dr;
+        if (on(f, r1) && !board[r1*8+f]) {
+          if (r1 === last) add(s, r1*8+f, { promo: turn === 'w' ? 'Q' : 'q' }); else add(s, r1*8+f, {});
+          if (r === start && !board[(r+2*dr)*8+f]) add(s, (r+2*dr)*8+f, { dbl: true });
+        }
+        for (const df of [-1, 1]) { const ff = f+df; if (!on(ff, r1)) continue; const to = r1*8+ff, q = board[to];
+          if (q && colorOf(q) !== turn) { if (r1 === last) add(s, to, { promo: turn === 'w' ? 'Q' : 'q' }); else add(s, to, {}); }
+          else if (to === st.ep) add(s, to, { ep: true, capt: turn === 'w' ? 'p' : 'P' }); }
+      } else if (t === 'N' || t === 'K') {
+        for (const [df, dr] of (t === 'N' ? KN : KG)) { const ff = f+df, rr = r+dr; if (!on(ff, rr)) continue; const q = board[rr*8+ff]; if (!q || colorOf(q) !== turn) add(s, rr*8+ff, {}); }
+        if (t === 'K') {
+          const opp = turn === 'w' ? 'b' : 'w', home = turn === 'w' ? 60 : 4;
+          if (s === home && !attacked(board, s, opp)) {
+            const ks = turn === 'w' ? 'K' : 'k', qs = turn === 'w' ? 'Q' : 'q';
+            if (st.castle[ks] && !board[s+1] && !board[s+2] && board[s+3] === (turn === 'w' ? 'R' : 'r') && !attacked(board, s+1, opp) && !attacked(board, s+2, opp)) add(s, s+2, { castle: 'K' });
+            if (st.castle[qs] && !board[s-1] && !board[s-2] && !board[s-3] && board[s-4] === (turn === 'w' ? 'R' : 'r') && !attacked(board, s-1, opp) && !attacked(board, s-2, opp)) add(s, s-2, { castle: 'Q' });
+          }
+        }
+      } else {
+        for (const [df, dr] of DIRS[t]) { let ff = f+df, rr = r+dr; while (on(ff, rr)) { const q = board[rr*8+ff]; if (q) { if (colorOf(q) !== turn) add(s, rr*8+ff, {}); break; } add(s, rr*8+ff, {}); ff += df; rr += dr; } }
+      }
+    }
+    return out;
+  }
+  function apply(st, m) {
+    const board = st.board.slice(), castle = Object.assign({}, st.castle);
+    const p = board[m.from], turn = st.turn;
+    board[m.to] = m.promo || p; board[m.from] = null;
+    if (m.ep) board[m.to + (turn === 'w' ? 8 : -8)] = null;
+    if (m.castle === 'K') { board[m.to-1] = board[m.to+1]; board[m.to+1] = null; }
+    if (m.castle === 'Q') { board[m.to+1] = board[m.to-2]; board[m.to-2] = null; }
+    if (p === 'K') { castle.K = castle.Q = false; } if (p === 'k') { castle.k = castle.q = false; }
+    if (m.from === 63 || m.to === 63) castle.K = false; if (m.from === 56 || m.to === 56) castle.Q = false;
+    if (m.from === 7 || m.to === 7) castle.k = false; if (m.from === 0 || m.to === 0) castle.q = false;
+    const ep = m.dbl ? (m.from + m.to) / 2 : -1;
+    return { board, turn: turn === 'w' ? 'b' : 'w', castle, ep, history: st.history, caps: st.caps, moves: st.moves };
+  }
+  function legal(st) { return pseudo(st).filter(m => !inCheck(apply(st, m), st.turn)); }
+
+  // ---------- computer opponent
+  const PST_CENTER = s => { const f = file(s), r = rank(s); return 3.5 - Math.max(Math.abs(f-3.5), Math.abs(r-3.5)); };
+  function evaluate(st) {
+    let sc = 0;
+    for (let s = 0; s < 64; s++) { const p = st.board[s]; if (!p) continue; const t = typeOf(p), sg = colorOf(p) === 'w' ? 1 : -1;
+      let v = VAL[t];
+      if (t === 'N' || t === 'B') v += PST_CENTER(s) * 6;
+      if (t === 'P') v += (colorOf(p) === 'w' ? 6 - rank(s) : rank(s) - 1) * 5 + PST_CENTER(s) * 2;
+      if (t === 'Q') v += PST_CENTER(s) * 2;
+      sc += sg * v; }
+    return st.turn === 'w' ? sc : -sc;
+  }
+  function search(st, depth, alpha, beta, ply) {
+    const ms = legal(st);
+    if (!ms.length) return inCheck(st, st.turn) ? -100000 + ply : 0;
+    if (depth === 0) return evaluate(st);
+    ms.sort((a, b) => (b.capt ? VAL[typeOf(b.capt)] : 0) - (a.capt ? VAL[typeOf(a.capt)] : 0));
+    let best = -Infinity;
+    for (const m of ms) { const v = -search(apply(st, m), depth - 1, -beta, -alpha, ply + 1); if (v > best) best = v; if (v > alpha) alpha = v; if (alpha >= beta) break; }
+    return best;
+  }
+  function think(st, level) {
+    const ms = legal(st); if (!ms.length) return null;
+    if (level === 1 && Math.random() < .5) { const caps = ms.filter(m => m.capt); return (caps.length && Math.random() < .7 ? caps : ms)[Math.floor(Math.random() * (caps.length && Math.random() < .7 ? caps.length : ms.length))]; }
+    const depth = level === 3 ? 3 : level === 2 ? 2 : 1;
+    let best = null, bestV = -Infinity;
+    ms.sort((a, b) => (b.capt ? VAL[typeOf(b.capt)] : 0) - (a.capt ? VAL[typeOf(a.capt)] : 0));
+    for (const m of ms) { const v = -search(apply(st, m), depth - 1, -Infinity, Infinity, 1) + Math.random() * (level === 3 ? 4 : 12); if (v > bestV) { bestV = v; best = m; } }
+    return best;
+  }
+
+  // ---------- sound: brass and woodwind voices
+  let actx = null, muted = false;
+  const NOTE = { P: 0, N: 4, B: 5, R: 7, Q: 12, K: -5 };
+  function tone(color, type, capture) {
+    if (muted) return;
+    try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) { return; }
+    const t = actx.currentTime, base = color === 'w' ? 174.6 : 523.25, f = base * Math.pow(2, NOTE[type] / 12);
+    const o = actx.createOscillator(), g = actx.createGain(), lp = actx.createBiquadFilter();
+    o.type = color === 'w' ? 'sawtooth' : 'triangle'; lp.type = 'lowpass'; lp.frequency.value = color === 'w' ? 1800 : 3000;
+    o.frequency.setValueAtTime(f * (capture ? 1.06 : 1), t); o.frequency.exponentialRampToValueAtTime(f, t + .06);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(color === 'w' ? .25 : .18, t + (color === 'w' ? .02 : .05)); g.gain.exponentialRampToValueAtTime(0.0001, t + (capture ? .55 : .3));
+    o.connect(lp).connect(g).connect(actx.destination); o.start(t); o.stop(t + .6);
+    if (capture) { const o2 = actx.createOscillator(), g2 = actx.createGain(); o2.type = 'square'; o2.frequency.setValueAtTime(f/2, t + .1); g2.gain.setValueAtTime(.0001, t); g2.gain.exponentialRampToValueAtTime(.12, t + .12); g2.gain.exponentialRampToValueAtTime(.0001, t + .5); o2.connect(lp); o2.start(t); o2.stop(t + .5); }
+  }
+
+  // ---------- UI state
+  let st = newState(), sel = -1, legalNow = [], lastMove = null, flipped = false, mode = 'cpu', cpuSide = 'b', level = 2, over = false, thinking = false;
+  const boardEl = document.getElementById('board'), msgEl = document.getElementById('msg'), turnEl = document.getElementById('turn');
+  const overEl = document.getElementById('over'), bannerEl = document.getElementById('banner');
+  const capW = document.getElementById('capW'), capB = document.getElementById('capB'), movesEl = document.getElementById('moves');
+  const sqEls = [];
+  for (let i = 0; i < 64; i++) { const d = document.createElement('div'); d.className = 'sq'; d.setAttribute('role', 'gridcell'); d.addEventListener('click', () => tap(+d.dataset.sq)); boardEl.appendChild(d); sqEls.push(d); }
+
+  const sideName = c => c === 'w' ? 'Brass' : 'Woodwinds';
+  function draw() {
+    const chk = inCheck(st, st.turn) ? kingSq(st.board, st.turn) : -1;
+    const targets = new Set(legalNow.map(m => m.to));
+    for (let i = 0; i < 64; i++) {
+      const s = flipped ? 63 - i : i, el = sqEls[i], p = st.board[s];
+      el.dataset.sq = s;
+      el.className = 'sq ' + (((file(s) + rank(s)) & 1) ? 'd' : 'l') + (lastMove && (lastMove.from === s || lastMove.to === s) ? ' last' : '') + (s === sel ? ' sel' : '') + (s === chk ? ' check' : '');
+      let html = '';
+      if (file(s) === (flipped ? 0 : 7)) html += `<span class="coord r">${8 - rank(s)}</span>`;
+      if (rank(s) === (flipped ? 0 : 7)) html += `<span class="coord f">${'abcdefgh'[file(s)]}</span>`;
+      if (p) html += svgFor(colorOf(p) + typeOf(p));
+      if (targets.has(s)) html += p ? '<span class="ring"></span>' : '<span class="dot"></span>';
+      el.innerHTML = html;
+      el.setAttribute('aria-label', sqName(s) + (p ? ' ' + NAME[colorOf(p)][typeOf(p)] : ''));
+    }
+    turnEl.className = 'turn ' + (st.turn === 'w' ? 'brass' : 'wood');
+    turnEl.innerHTML = over ? 'Game over' : `<b>${sideName(st.turn)}</b> to move${inCheck(st, st.turn) ? ' · check!' : ''}`;
+    capW.innerHTML = st.caps.w.map(p => svgFor('b' + typeOf(p))).join('');
+    capB.innerHTML = st.caps.b.map(p => svgFor('w' + typeOf(p))).join('');
+    movesEl.innerHTML = st.moves.map((m, i) => (i % 2 === 0 ? `<span class="n">${i/2 + 1}.</span>` : '') + `<span class="m ${i % 2 ? 'w' : 'b'}">${m}</span>`).join('') ;
+    movesEl.scrollTop = movesEl.scrollHeight;
+    document.getElementById('undo').disabled = !st.history.length || thinking;
+  }
+  function describe(m, st0) {
+    const p = m.piece, c = colorOf(p), n = NAME[c][typeOf(p)];
+    if (m.castle) return `${n} castles ${m.castle === 'K' ? 'short' : 'long'}`;
+    let s = `${n} ${sqName(m.from)}–${sqName(m.to)}`;
+    if (m.capt) s += ` takes ${NAME[colorOf(m.capt)][typeOf(m.capt)].toLowerCase()}`;
+    if (m.promo) s += `, promoted to ${NAME[c].Q.toLowerCase()}`;
+    return s;
+  }
+  function short(m) { const t = typeOf(m.piece); return (m.castle ? (m.castle === 'K' ? 'O-O' : 'O-O-O') : (t === 'P' ? '' : t) + (m.capt ? 'x' : '') + sqName(m.to) + (m.promo ? '=Q' : '')); }
+  function play(m) {
+    const prev = st;
+    const next = apply(st, m);
+    next.history = st.history.concat([{ st, m, lastMove }]);
+    next.caps = { w: st.caps.w.slice(), b: st.caps.b.slice() };
+    if (m.capt) next.caps[st.turn].push(m.capt);
+    next.moves = st.moves.concat([short(m)]);
+    st = next; lastMove = m; sel = -1; legalNow = [];
+    tone(colorOf(m.piece), typeOf(m.piece), !!m.capt);
+    let text = describe(m, prev);
+    const ms = legal(st);
+    if (!ms.length) {
+      over = true;
+      if (inCheck(st, st.turn)) { const w = sideName(prev.turn); text += `. <b>Checkmate.</b>`; banner(`<b>${w} win.</b><br>${prev.turn === 'w' ? 'The tuba takes a bow.' : 'The bassoon takes a bow.'}`); }
+      else { text += '. Stalemate.'; banner('<b>Stalemate.</b><br>Everybody packs up.'); }
+    } else if (inCheck(st, st.turn)) { text += `. <b>Check!</b>`; const k = st.board[kingSq(st.board, st.turn)]; text += ` The ${NAME[st.turn].K.toLowerCase()} is in trouble.`; }
+    msgEl.innerHTML = text; draw();
+    if (!over && mode === 'cpu' && st.turn === cpuSide) cpuMove();
+  }
+  function banner(html) { bannerEl.innerHTML = html; overEl.hidden = false; }
+  function cpuMove() {
+    thinking = true; draw(); msgEl.innerHTML = msgEl.innerHTML + ' <span style="color:var(--muted)">Thinking…</span>';
+    setTimeout(() => { const m = think(st, level); thinking = false; if (m && !over) play(m); else draw(); }, 350 + Math.random() * 400);
+  }
+  function tap(s) {
+    if (over || thinking) return;
+    if (mode === 'cpu' && st.turn === cpuSide) return;
+    const p = st.board[s];
+    const mv = legalNow.find(m => m.to === s);
+    if (sel >= 0 && mv) { play(mv); return; }
+    if (p && colorOf(p) === st.turn) {
+      sel = s; legalNow = legal(st).filter(m => m.from === s);
+      msgEl.innerHTML = `<b>${NAME[st.turn][typeOf(p)]}</b> (${ROLE[typeOf(p)]}) · ${legalNow.length ? legalNow.length + ' move' + (legalNow.length > 1 ? 's' : '') : 'no moves'}`;
+    } else { sel = -1; legalNow = []; }
+    draw();
+  }
+  function reset() { st = newState(); sel = -1; legalNow = []; lastMove = null; over = false; thinking = false; overEl.hidden = true; msgEl.innerHTML = 'Brass opens. Tap a piece to see where it can go.'; draw(); if (mode === 'cpu' && cpuSide === 'w') cpuMove(); }
+  function undo() {
+    if (thinking || !st.history.length) return;
+    let h = st.history[st.history.length - 1]; st = h.st; lastMove = h.lastMove;
+    if (mode === 'cpu' && st.turn === cpuSide && st.history.length) { h = st.history[st.history.length - 1]; st = h.st; lastMove = h.lastMove; }
+    over = false; overEl.hidden = true; sel = -1; legalNow = []; msgEl.innerHTML = 'Took that back.'; draw();
+  }
+
+  // ---------- controls
+  document.getElementById('new').onclick = reset;
+  document.getElementById('undo').onclick = undo;
+  document.getElementById('flip').onclick = () => { flipped = !flipped; draw(); };
+  const muteBtn = document.getElementById('mute');
+  muteBtn.onclick = () => { muted = !muted; muteBtn.textContent = muted ? 'Sound off' : 'Sound on'; };
+  const seg = (id, key, cb) => document.querySelectorAll('#' + id + ' button').forEach(b => b.onclick = () => { document.querySelectorAll('#' + id + ' button').forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset[key]); });
+  seg('mode', 'm', v => { mode = v; if (mode === 'cpu' && !over && st.turn === cpuSide) cpuMove(); else draw(); });
+  seg('side', 's', v => { cpuSide = v; flipped = (v === 'w'); if (mode === 'cpu' && !over && st.turn === cpuSide) cpuMove(); else draw(); });
+  seg('level', 'l', v => { level = +v; });
+
+  // legend
+  const legend = document.getElementById('legend');
+  for (const t of ['K', 'Q', 'R', 'B', 'N', 'P']) for (const c of ['w', 'b']) { const d = document.createElement('div'); d.innerHTML = `${svgFor(c + t)}<b>${NAME[c][t]}</b><span class="k">${ROLE[t]}</span>`; legend.appendChild(d); }
+
+  draw();
+})();
+</script>
+</body>
+</html>
