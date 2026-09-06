@@ -43,7 +43,7 @@
   .sq .coord{position:absolute;font-family:"Silkscreen",monospace;font-size:calc(var(--sq) * .14);opacity:.55;pointer-events:none}
   .sq .coord.f{right:4%;bottom:2%} .sq .coord.r{left:4%;top:3%}
   .sq.l .coord{color:var(--dark)} .sq.d .coord{color:var(--light)}
-  .sq svg{width:82%;height:82%;filter:drop-shadow(1px 2px 0 #00000088);pointer-events:none;transition:transform .12s}
+  .sq svg{width:92%;height:92%;filter:drop-shadow(1px 2px 0 #00000088);pointer-events:none;transition:transform .12s}
   .sq.sel svg{transform:translateY(-4%) scale(1.06)}
   @media (prefers-reduced-motion:reduce){.sq svg{transition:none}}
   aside{display:flex;flex-direction:column;gap:10px;min-width:0}
@@ -58,11 +58,11 @@
   .msg{font-size:15px;min-height:1.4em}
   .msg b{color:var(--sel)}
   .cap{display:flex;flex-wrap:wrap;gap:2px;min-height:26px}
-  .cap svg{width:24px;height:24px;filter:drop-shadow(1px 1px 0 #0009)}
+  .cap svg{width:26px;height:30px;filter:drop-shadow(1px 1px 0 #0009)}
   .moves{font-family:"Silkscreen",monospace;font-size:10px;line-height:1.9;max-height:150px;overflow:auto;display:grid;grid-template-columns:2.4em 1fr 1fr;column-gap:8px;color:var(--muted)}
   .moves .n{color:var(--muted)} .moves .m{color:var(--ink)} .moves .m.b{color:var(--brass)} .moves .m.w{color:var(--wood)}
   .legend{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:12px;color:var(--muted)}
-  .legend div{display:flex;align-items:center;gap:8px} .legend svg{width:22px;height:22px;flex:none;filter:drop-shadow(1px 1px 0 #0009)}
+  .legend div{display:flex;align-items:center;gap:8px} .legend svg{width:22px;height:26px;flex:none;filter:drop-shadow(1px 1px 0 #0009)}
   .legend b{color:var(--ink);font-weight:400}
   .legend .k{font-family:"Silkscreen",monospace;font-size:9px;letter-spacing:.06em;margin-left:auto;text-transform:uppercase}
   .over{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
@@ -125,28 +125,61 @@
     b: { K:'Bassoon', Q:'Flute', R:'Bass clarinet', B:'Oboe', N:'Saxophone', P:'Clarinet' },
   };
   const ROLE = { K:'king', Q:'queen', R:'rook', B:'bishop', N:'knight', P:'pawn' };
-  const ART = {
-    wK: ["....#######...","...#########..","....#######...",".....#.#.#....","..o.o.#.#.#...","..#.#.#.#.#...",".############.",".#..........#.",".#..........#.",".#..........#.",".#..........#.",".############.","..##########..","...########..."],
-    wQ: ["..............","..............","..............","....o.o.o.....","....#.#.#....#","..##########.#",".#############","..############","...#.#.#...##.","...#####......","..............","..............","..............",".............."],
-    wR: ["..............","..............","............##","..#########.##",".############.","..#########.##","..#.......#.##","..#########...","..#.......#...","..#########...","..............","..............","..............",".............."],
-    wB: ["..............","....######....","...#......#...","..#..####..#..","..#.#....#.#..","..#.#.oo.#.#..","..#.#....#.#..","..#..####..#..","...#......#.##","....######.###","..........####","...........###","..............",".............."],
-    wN: [".......###....","......#####...",".......###....","........#.....","...o.o.o#.....","...#.#.##.....","..#########...","..#.......#...","..#.......#...","..#.......#...","..#########...","...#######....","..............",".............."],
-    wP: ["..............","..............","..............","......o.o.....","......#.#...#.","....#######.#.","...##########.","....#######.#.","....##.#.#.#..","......###.....","..............","..............","..............",".............."],
-    bK: [".....#........","......#.......",".....#.##.....","....#..##.....","......##.#....","......##.#....","......o#.#....","......##.#....","......#o.#....","......##.#....","......##.#....","......####....","......####....","......####...."],
-    bQ: ["......##......","......##......","......##......","......o#......","......##......","......#o......","......##......","......o#......","......##......","......#o......","......##......","......o#......","......##......","......##......"],
-    bR: [".....###......","....#...#.....","....#...##....","........##....","........o#....","........##....","........#o....","........##....","........o#....","........##....","........##.##.","........###.#.","........#####.","..........##.."],
-    bB: [".......#......",".......#......","......##......","......##......","......o#......","......##......","......#o......","......##......","......o#......","......##......",".....####.....",".....####.....","....######....","..............",],
-    bN: ["......##......",".....#..#.....",".....#..##....","........##....","........o#....","........##....","........#o....","........##....","........o#....","......####....","......###.##..","......###..#..",".......#####..","........###..."],
-    bP: [".......#......","......##......","......##......","......##......","......o#......","......##......","......#o......","......##......","......o#......","......##......",".....####.....","....######....","..............",".............."],
+  // ---------- pixel marchers: one uniformed figure, plus the instrument they carry
+  const BASE = [
+    "................",
+    "......pp........",
+    ".....hhhh.......",
+    ".....htth.......",
+    ".....hhhh.......",
+    ".....ssss.......",
+    ".....ssss.......",
+    "....uutuuu......",
+    "...uuutuuuu.....",
+    "...uuutuuuu.....",
+    "...uuutuuuu.....",
+    "...uuuuuuuu.....",
+    "....uuuuuu......",
+    "....uu..uu......",
+    "....uu..uu......",
+    "....uu..uu......",
+    "....dd..dd......",
+    "................",
+  ];
+  // patches: [row, col, chars]  i = instrument, k = instrument keys/valves, g = glove, p = plume
+  const PATCH = {
+    wK: [[0,5,"pppp"],[1,5,"pppp"],[1,1,"iiii"],[2,0,"iiiiii"],[3,1,"iiii"],[4,2,"ii"],[5,2,"ii"],[6,2,"ii"],[7,2,"ii"],[8,2,"iiiiii"],[9,2,"i"],[9,7,"i"],[10,2,"i"],[10,4,"kkk"],[10,7,"i"],[11,2,"iiiiii"],[10,8,"g"]],
+    wQ: [[0,6,"pp"],[4,10,"k"],[4,12,"k"],[4,14,"ii"],[5,9,"iiiiiii"],[6,14,"ii"],[7,10,"gg"]],
+    wR: [[4,15,"i"],[5,9,"iiiiiii"],[6,9,"i"],[6,15,"i"],[7,9,"iiiiii"],[8,10,"gg"]],
+    wB: [[8,9,"iiii"],[9,8,"i"],[9,13,"i"],[10,8,"i"],[10,10,"kk"],[10,13,"i"],[11,8,"i"],[11,13,"i"],[12,9,"iiiiii"],[13,12,"iiii"],[10,7,"g"]],
+    wN: [[3,11,"iii"],[4,10,"iiiii"],[5,11,"iii"],[6,12,"i"],[7,12,"i"],[8,9,"iiiii"],[9,9,"i"],[9,13,"i"],[10,9,"i"],[10,11,"k"],[10,13,"i"],[11,9,"iiiii"],[10,8,"g"]],
+    wP: [[1,6,".."],[4,10,"k"],[4,13,"i"],[5,9,"iiiii"],[6,13,"i"],[7,10,"g"]],
+    bK: [[0,5,"pppp"],[1,5,"pppp"],[1,12,"i"],[2,12,"i"],[3,12,"ii"],[4,11,"k"],[4,12,"ii"],[5,10,"k"],[5,12,"ii"],[6,9,"k"],[6,12,"ii"],[7,12,"ii"],[7,14,"k"],[8,12,"ii"],[9,12,"ii"],[9,14,"k"],[10,12,"ii"],[11,12,"ii"],[11,14,"k"],[12,12,"ii"],[13,12,"ii"],[8,11,"g"],[11,11,"g"]],
+    bQ: [[0,6,"pp"],[5,9,"ikikiki"],[6,10,"g"],[6,13,"g"]],
+    bR: [[4,10,"kk"],[5,12,"k"],[6,12,"i"],[7,12,"i"],[7,13,"k"],[8,12,"i"],[9,12,"i"],[9,13,"k"],[10,12,"i"],[11,12,"i"],[11,13,"k"],[12,12,"i"],[12,14,"i"],[13,12,"i"],[13,14,"i"],[14,12,"iii"],[8,11,"g"],[11,11,"g"]],
+    bB: [[4,10,"k"],[5,10,"k"],[6,10,"i"],[7,10,"ik"],[8,10,"i"],[9,10,"ik"],[10,10,"i"],[11,10,"ik"],[12,10,"i"],[13,9,"iii"],[8,9,"g"],[11,9,"g"]],
+    bN: [[5,9,"kk"],[6,11,"i"],[7,11,"ii"],[8,11,"ii"],[8,13,"k"],[9,11,"ii"],[9,13,"iii"],[10,11,"ii"],[10,13,"k"],[10,14,"i"],[11,11,"ii"],[11,14,"i"],[12,11,"ii"],[12,14,"i"],[13,11,"iiii"],[8,10,"g"],[11,10,"g"]],
+    bP: [[1,6,".."],[6,9,"k"],[7,9,"i"],[8,9,"ik"],[9,9,"i"],[10,9,"ik"],[11,9,"i"],[12,9,"i"],[13,8,"iii"],[8,8,"g"],[11,8,"g"]],
   };
+  const INSTR = { // instrument body and key colors per piece
+    wK:['#F0C55A','#8A6420'], wQ:['#F0C55A','#8A6420'], wR:['#F0C55A','#8A6420'], wB:['#F0C55A','#8A6420'], wN:['#F0C55A','#8A6420'], wP:['#F0C55A','#8A6420'],
+    bK:['#7A4424','#D8DEE6'], bQ:['#D8DEE6','#8A94A0'], bR:['#2B2B33','#D8DEE6'], bB:['#2B2B33','#D8DEE6'], bN:['#D8B24C','#8A6A20'], bP:['#2B2B33','#D8DEE6'],
+  };
+  const SIDE = { w: { u:'#C63D2F', t:'#F0C55A', p:'#F0C55A' }, b: { u:'#3A6EB5', t:'#D8DEE6', p:'#F4F1EA' } };
+  const COMMON = { h:'#1B1B22', d:'#1B1B22', s:'#E8B892', g:'#F4F1EA' };
+  function art(code) {
+    const rows = BASE.map(r => r.split(''));
+    for (const [r, c, str] of PATCH[code]) for (let k = 0; k < str.length; k++) rows[r][c + k] = str[k];
+    return rows.map(r => r.join(''));
+  }
   const svgCache = {};
   function svgFor(code) {
     if (svgCache[code]) return svgCache[code];
-    const c = code[0], rows = ART[code];
-    const body = c === 'w' ? css('--brass') : css('--wood'), acc = c === 'w' ? css('--brass-dk') : css('--wood-dk');
+    const side = SIDE[code[0]], [ic, kc] = INSTR[code];
+    const col = { ...COMMON, ...side, i: ic, k: kc };
     let r = '';
-    rows.forEach((row, y) => { for (let x = 0; x < 14; x++) { const ch = row[x]; if (ch === '#') r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${body}"/>`; else if (ch === 'o') r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${acc}"/>`; } });
-    return svgCache[code] = `<svg viewBox="0 0 14 14" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+    art(code).forEach((row, y) => { for (let x = 0; x < 16; x++) { const c = col[row[x]]; if (c) r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${c}"/>`; } });
+    return svgCache[code] = `<svg viewBox="0 0 16 18" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
   }
   function css(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 
