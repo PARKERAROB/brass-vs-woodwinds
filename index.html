@@ -43,9 +43,9 @@
   .sq .coord{position:absolute;font-family:"Silkscreen",monospace;font-size:calc(var(--sq) * .14);opacity:.55;pointer-events:none}
   .sq .coord.f{right:4%;bottom:2%} .sq .coord.r{left:4%;top:3%}
   .sq.l .coord{color:var(--dark)} .sq.d .coord{color:var(--light)}
-  .sq svg{width:92%;height:92%;filter:drop-shadow(1px 2px 0 #00000088);pointer-events:none;transition:transform .12s}
-  .sq.sel svg{transform:translateY(-4%) scale(1.06)}
-  @media (prefers-reduced-motion:reduce){.sq svg{transition:none}}
+  .sq .piece{width:92%;height:92%;object-fit:contain;filter:drop-shadow(1px 2px 0 #00000088);pointer-events:none;transition:transform .12s}
+  .sq.sel .piece{transform:translateY(-4%) scale(1.06)}
+  @media (prefers-reduced-motion:reduce){.sq .piece{transition:none}}
   aside{display:flex;flex-direction:column;gap:10px;min-width:0}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
   .lbl{font-family:"Silkscreen",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
@@ -58,11 +58,11 @@
   .msg{font-size:15px;min-height:1.4em}
   .msg b{color:var(--sel)}
   .cap{display:flex;flex-wrap:wrap;gap:2px;min-height:26px}
-  .cap svg{width:26px;height:30px;filter:drop-shadow(1px 1px 0 #0009)}
+  .cap .piece{width:26px;height:30px;object-fit:contain;filter:drop-shadow(1px 1px 0 #0009)}
   .moves{font-family:"Silkscreen",monospace;font-size:10px;line-height:1.9;max-height:150px;overflow:auto;display:grid;grid-template-columns:2.4em 1fr 1fr;column-gap:8px;color:var(--muted)}
   .moves .n{color:var(--muted)} .moves .m{color:var(--ink)} .moves .m.b{color:var(--brass)} .moves .m.w{color:var(--wood)}
   .legend{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:12px;color:var(--muted)}
-  .legend div{display:flex;align-items:center;gap:8px} .legend svg{width:22px;height:26px;flex:none;filter:drop-shadow(1px 1px 0 #0009)}
+  .legend div{display:flex;align-items:center;gap:8px} .legend .piece{width:22px;height:26px;object-fit:contain;flex:none;filter:drop-shadow(1px 1px 0 #0009)}
   .legend b{color:var(--ink);font-weight:400}
   .legend .k{font-family:"Silkscreen",monospace;font-size:9px;letter-spacing:.06em;margin-left:auto;text-transform:uppercase}
   .over{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
@@ -125,63 +125,9 @@
     b: { K:'Bassoon', Q:'Oboe', R:'Snare drum', B:'Flute', N:'Saxophone', P:'Clarinet' },
   };
   const ROLE = { K:'king', Q:'queen', R:'rook', B:'bishop', N:'knight', P:'pawn' };
-  // ---------- pixel marchers: one uniformed figure, plus the instrument they carry
-  const BASE = [
-    "................",
-    "......pp........",
-    ".....hhhh.......",
-    ".....htth.......",
-    ".....hhhh.......",
-    ".....ssss.......",
-    ".....ssss.......",
-    "....uutuuu......",
-    "...uuutuuuu.....",
-    "...uuutuuuu.....",
-    "...uuutuuuu.....",
-    "...uuuuuuuu.....",
-    "....uuuuuu......",
-    "....uu..uu......",
-    "....uu..uu......",
-    "....uu..uu......",
-    "....dd..dd......",
-    "................",
-  ];
-  // patches: [row, col, chars]  i = instrument, k = instrument keys/valves/rims, g = glove, d = sticks, p = plume
-  const INSTRUMENT = {
-    tuba:     [[1,1,"iiii"],[2,0,"iiiiii"],[3,1,"iiii"],[4,2,"ii"],[5,2,"ii"],[6,2,"ii"],[7,2,"ii"],[8,2,"iiiiii"],[9,2,"i"],[9,7,"i"],[10,2,"i"],[10,4,"kkk"],[10,7,"i"],[11,2,"iiiiii"],[10,8,"g"]],
-    trumpet:  [[4,10,"k"],[4,12,"k"],[4,14,"ii"],[5,9,"iiiiiii"],[6,14,"ii"],[7,10,"gg"]],
-    trombone: [[4,15,"i"],[5,9,"iiiiiii"],[6,9,"i"],[6,15,"i"],[7,9,"iiiiii"],[8,10,"gg"]],
-    horn:     [[8,9,"iiii"],[9,8,"i"],[9,13,"i"],[10,8,"i"],[10,10,"kk"],[10,13,"i"],[11,8,"i"],[11,13,"i"],[12,9,"iiiiii"],[13,12,"iiii"],[10,7,"g"]],
-    euph:     [[3,11,"iii"],[4,10,"iiiii"],[5,11,"iii"],[6,12,"i"],[7,12,"i"],[8,9,"iiiii"],[9,9,"i"],[9,13,"i"],[10,9,"i"],[10,11,"k"],[10,13,"i"],[11,9,"iiiii"],[10,8,"g"]],
-    snare:    [[8,2,"d"],[8,11,"d"],[9,2,"g"],[9,11,"g"],[10,3,"kkkkkkkk"],[11,3,"iiiiiiii"],[12,3,"iiiiiiii"],[13,3,"kkkkkkkk"]],
-    bassoon:  [[1,12,"i"],[2,12,"i"],[3,12,"ii"],[4,11,"k"],[4,12,"ii"],[5,10,"k"],[5,12,"ii"],[6,9,"k"],[6,12,"ii"],[7,12,"ii"],[7,14,"k"],[8,12,"ii"],[9,12,"ii"],[9,14,"k"],[10,12,"ii"],[11,12,"ii"],[11,14,"k"],[12,12,"ii"],[13,12,"ii"],[8,11,"g"],[11,11,"g"]],
-    oboe:     [[4,10,"k"],[5,10,"k"],[6,10,"i"],[7,10,"ik"],[8,10,"i"],[9,10,"ik"],[10,10,"i"],[11,10,"ik"],[12,10,"i"],[13,9,"iii"],[8,9,"g"],[11,9,"g"]],
-    flute:    [[5,9,"ikikiki"],[6,10,"g"],[6,13,"g"]],
-    bassclar: [[4,10,"kk"],[5,12,"k"],[6,12,"i"],[7,12,"i"],[7,13,"k"],[8,12,"i"],[9,12,"i"],[9,13,"k"],[10,12,"i"],[11,12,"i"],[11,13,"k"],[12,12,"i"],[12,14,"i"],[13,12,"i"],[13,14,"i"],[14,12,"iii"],[8,11,"g"],[11,11,"g"]],
-    sax:      [[5,9,"kk"],[6,11,"i"],[7,11,"ii"],[8,11,"ii"],[8,13,"k"],[9,11,"ii"],[9,13,"iii"],[10,11,"ii"],[10,13,"k"],[10,14,"i"],[11,11,"ii"],[11,14,"i"],[12,11,"ii"],[12,14,"i"],[13,11,"iiii"],[8,10,"g"],[11,10,"g"]],
-    clarinet: [[6,9,"k"],[7,9,"i"],[8,9,"ik"],[9,9,"i"],[10,9,"ik"],[11,9,"i"],[12,9,"i"],[13,8,"iii"],[8,8,"g"],[11,8,"g"]],
-  };
-  const COLORS = { // instrument body and key colors
-    tuba:['#F0C55A','#8A6420'], trumpet:['#F0C55A','#8A6420'], trombone:['#F0C55A','#8A6420'], horn:['#F0C55A','#8A6420'], euph:['#F0C55A','#8A6420'], snare:['#E9E4D6','#8A94A0'],
-    bassoon:['#7A4424','#D8DEE6'], oboe:['#2B2B33','#D8DEE6'], flute:['#D8DEE6','#8A94A0'], bassclar:['#2B2B33','#D8DEE6'], sax:['#D8B24C','#8A6A20'], clarinet:['#2B2B33','#D8DEE6'],
-  };
-  const CARRY = { wK:'tuba', wQ:'euph', wR:'snare', wB:'trombone', wN:'horn', wP:'trumpet', bK:'bassoon', bQ:'oboe', bR:'snare', bB:'flute', bN:'sax', bP:'clarinet' };
-  const PLUME = { K: [[0,5,"pppp"],[1,5,"pppp"]], Q: [[0,6,"pp"]], P: [[1,6,".."]] };
-  const SIDE = { w: { u:'#C63D2F', t:'#F0C55A', p:'#F0C55A' }, b: { u:'#3A6EB5', t:'#D8DEE6', p:'#F4F1EA' } };
-  const COMMON = { h:'#1B1B22', d:'#1B1B22', s:'#E8B892', g:'#F4F1EA' };
-  function art(code) {
-    const rows = BASE.map(r => r.split(''));
-    for (const [r, c, str] of (PLUME[code[1]] || []).concat(INSTRUMENT[CARRY[code]])) for (let k = 0; k < str.length; k++) rows[r][c + k] = str[k];
-    return rows.map(r => r.join(''));
-  }
-  const svgCache = {};
-  function svgFor(code) {
-    if (svgCache[code]) return svgCache[code];
-    const side = SIDE[code[0]], [ic, kc] = COLORS[CARRY[code]];
-    const col = { ...COMMON, ...side, i: ic, k: kc };
-    let r = '';
-    art(code).forEach((row, y) => { for (let x = 0; x < 16; x++) { const c = col[row[x]]; if (c) r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${c}"/>`; } });
-    return svgCache[code] = `<svg viewBox="0 0 16 18" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+  // Original artwork extracted from Rob's supplied sheet; see assets/sprites/README.md.
+  function spriteFor(code) {
+    return `<img class="piece" src="assets/sprites/${code}.png" alt="" aria-hidden="true" draggable="false">`;
   }
   function css(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 
@@ -326,15 +272,15 @@
       let html = '';
       if (file(s) === (flipped ? 0 : 7)) html += `<span class="coord r">${8 - rank(s)}</span>`;
       if (rank(s) === (flipped ? 0 : 7)) html += `<span class="coord f">${'abcdefgh'[file(s)]}</span>`;
-      if (p) html += svgFor(colorOf(p) + typeOf(p));
+      if (p) html += spriteFor(colorOf(p) + typeOf(p));
       if (targets.has(s)) html += p ? '<span class="ring"></span>' : '<span class="dot"></span>';
       el.innerHTML = html;
       el.setAttribute('aria-label', sqName(s) + (p ? ' ' + NAME[colorOf(p)][typeOf(p)] : ''));
     }
     turnEl.className = 'turn ' + (st.turn === 'w' ? 'brass' : 'wood');
     turnEl.innerHTML = over ? 'Game over' : `<b>${sideName(st.turn)}</b> to move${inCheck(st, st.turn) ? ' · check!' : ''}`;
-    capW.innerHTML = st.caps.w.map(p => svgFor('b' + typeOf(p))).join('');
-    capB.innerHTML = st.caps.b.map(p => svgFor('w' + typeOf(p))).join('');
+    capW.innerHTML = st.caps.w.map(p => spriteFor('b' + typeOf(p))).join('');
+    capB.innerHTML = st.caps.b.map(p => spriteFor('w' + typeOf(p))).join('');
     movesEl.innerHTML = st.moves.map((m, i) => (i % 2 === 0 ? `<span class="n">${i/2 + 1}.</span>` : '') + `<span class="m ${i % 2 ? 'w' : 'b'}">${m}</span>`).join('') ;
     movesEl.scrollTop = movesEl.scrollHeight;
     document.getElementById('undo').disabled = !st.history.length || thinking;
@@ -405,7 +351,7 @@
 
   // legend
   const legend = document.getElementById('legend');
-  for (const t of ['K', 'Q', 'R', 'B', 'N', 'P']) for (const c of ['w', 'b']) { const d = document.createElement('div'); d.innerHTML = `${svgFor(c + t)}<b>${NAME[c][t]}</b><span class="k">${ROLE[t]}</span>`; legend.appendChild(d); }
+  for (const t of ['K', 'Q', 'R', 'B', 'N', 'P']) for (const c of ['w', 'b']) { const d = document.createElement('div'); d.innerHTML = `${spriteFor(c + t)}<b>${NAME[c][t]}</b><span class="k">${ROLE[t]}</span>`; legend.appendChild(d); }
 
   draw();
 })();
